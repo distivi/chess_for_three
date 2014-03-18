@@ -24,4 +24,4 @@ def secure_token
   end
 end
 
-SampleApp::Application.config.secret_key_base = secure_token
+ChessForThree::Application.config.secret_key_base = secure_token
