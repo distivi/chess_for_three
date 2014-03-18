@@ -9,4 +9,19 @@
 
 # Make sure your secret_key_base is kept private
 # if you're sharing your code publicly.
-ChessForThree::Application.config.secret_key_base = '07e742088947c8e23925ea86838a88ff1717a06b33fe4f22cfaa5b063b6ffc09fca6113f98fe165a044f7e71c9ba1ee155a3f6fef10b48f157516b6112ea9546'
+require 'securerandom'
+
+def secure_token
+  token_file = Rails.root.join('.secret')
+  if File.exist?(token_file)
+    # Use the existing token.
+    File.read(token_file).chomp
+  else
+    # Generate a new token and store it in token_file.
+    token = SecureRandom.hex(64)
+    File.write(token_file, token)
+    token
+  end
+end
+
+SampleApp::Application.config.secret_key_base = secure_token
