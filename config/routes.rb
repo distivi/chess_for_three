@@ -1,12 +1,20 @@
 ChessForThree::Application.routes.draw do
   resources :users
   resources :sessions, only: [:new, :create, :destroy]
+  resources :rooms 
 
   root 'sessions#new'
 
   match '/signup',  to: 'users#new',            via: 'get'
   match '/signin',  to: 'sessions#new',         via: 'get'
   match '/signout', to: 'sessions#destroy',     via: 'delete'
+  match '/rooms',   to: 'rooms#index',          via: 'get'
+  match '/new_room',to: 'rooms#new',            via: 'get'
+
+  match '/rooms/:id/take_place', to: 'rooms#take_place', :action => 'take_place', via: 'post'
+
+  match '/game',    to: 'game#main',            via: 'get'
+
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'

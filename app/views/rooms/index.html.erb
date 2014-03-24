@@ -1,0 +1,27 @@
+<% if @rooms.empty? %>
+	<h1>Haven't opened rooms</h1>
+<% end %>
+
+<%= button_to "Create new room", new_room_path, :method => "get", :class => "btn btn-success" %>
+
+<h1>Open Rooms</h1>
+<table class="table">
+	<tr>
+		<td>#</td>
+		<td>Room Name</td>
+		<td>Players in Room</td>
+		<td>Action</td>
+	</tr>
+	<% counter = 1 %>
+	<% @rooms.each do |room| %>
+		<% if room.users_count < 3%>
+			<tr>
+				<td><%= counter %></td>
+				<td><%= room.name %></td>
+				<td><%= room.users_count %></td>
+				<td><%= button_to "Enter", room_path(room), :method => "get", :class => "btn btn-success" %></td>
+				<% counter += 1 %>
+			</tr>
+		<% end %>
+	<%end%>
+</table>

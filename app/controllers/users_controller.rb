@@ -12,7 +12,7 @@ class UsersController < ApplicationController
 		if @user.save
 			sign_in @user
 			flash[:success] = "Welcome to the Chess for Three"
-			redirect_to @user
+			redirect_to rooms_path
 		else
 			render 'new'
 		end

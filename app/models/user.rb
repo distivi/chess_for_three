@@ -1,4 +1,7 @@
 class User < ActiveRecord::Base
+	belongs_to :room
+	validates_associated :room, :message => "You are waiting in anouther room"
+
 	before_save { self.email = email.downcase }
 	before_create :create_remember_token
 

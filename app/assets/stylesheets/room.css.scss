@@ -1,0 +1,21 @@
+// Place all the styles related to the Room controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+.centered-row {
+	margin: 0 auto;
+	width: 608px;
+}
+
+.col {
+	display: inline-block;
+	width: 200px;
+	margin: 0;
+	padding: 0;
+	text-align: center;
+}
+
+.connected-player {
+	border: 2px solid #2e993f;
+	border-radius: 5px;
+}

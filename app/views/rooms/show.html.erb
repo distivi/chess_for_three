@@ -1,0 +1,40 @@
+<h1><%= @room.name %></h1>
+
+<div class="centered-row">
+	<div class="col">
+		<%= image_tag("king_white.png", :alt => "white figure") %>
+		<% if not @player_white%>
+			<%= button_to "Take White place", {:controller => :rooms,
+						:action => 'take_place',
+						:user => current_user,
+						:room => @room,
+						:color => :white }, :method => "post", :class => "btn btn-success" %>
+		<% else %>
+			<p class="connected-player"><%= @player_white.name %></p>
+		<% end %>
+	</div>
+	<div class="col">
+		<%= image_tag("king_black.png", :alt => "black figure") %>
+		<% if not @player_black%>
+			<%= button_to "Take Black place", {:controller => :rooms,
+						:action => 'take_place',
+						:user => current_user,
+						:room => @room,
+						:color => :black }, :method => "post", :class => "btn btn-success" %>
+		<% else %>
+			<p class="connected-player"><%= @player_black.name %></p>
+		<% end %>
+	</div>
+	<div class="col">
+		<%= image_tag("king_red.png", :alt => "red figure") %>
+		<% if not @player_red%>
+			<%= button_to "Take Red place", {:controller => :rooms,
+						:action => 'take_place',
+						:user => current_user,
+						:room => @room,
+						:color => :red }, :method => "post", :class => "btn btn-success" %>
+		<% else %>
+			<p class="connected-player"><%= @player_red.name %></p>
+		<% end %>
+	</div>
+</div>
