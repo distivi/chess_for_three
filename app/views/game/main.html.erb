@@ -1,7 +1,3 @@
-<% content_for :head do %>
-	<%= javascript_include_tag 'main_game.js' %>
-<% end %>
-
 <script>
 	var room_id = <%= @room.id%>;
 	var user_id = <%= current_user.id %>;
