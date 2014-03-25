@@ -1,0 +1,10 @@
+development:
+  server: "http://localhost:9292/faye"
+  secret_token: "secret"
+test:
+  server: "http://localhost:9292/faye"
+  secret_token: "secret"
+production:
+  server: "http://chess3.herokuapp.com/faye"
+  secret_token: "22fbe2f916814722335a31bbd5e7c1bd6c7d80cc35713023e467aaee47e6afdb"
+  signature_expiration: 3600 # one hour

@@ -1,10 +1,14 @@
 class RoomsController < ApplicationController
 	def index
-		room = current_user.room
-		if room && room_filled?(room)
-			redirect_to :controller=>'game', :action => 'main', :id => room.id 
-		else 
-			@rooms = Room.all
+		if not signed_in?
+			redirect_to root_path
+		else
+			room = current_user.room
+			if room
+				redirect_to :controller=>'game', :action => 'main', :id => room.id 
+			else 
+				@rooms = Room.all
+			end
 		end
 	end
 

@@ -1,3 +1,68 @@
 // Place all the styles related to the game controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+
+#chat {
+	height: 300px;
+	overflow-y: scroll;
+	margin: 2px 0;
+	border: 1px solid #204823;
+	border-radius: 5px;
+	padding: 2px 10px;
+}
+
+.msg {
+	width: 40%;
+	border-radius: 10px;
+	border: 1px solid black;
+	padding: 2px 10px;
+}
+
+.white {
+		background: #eee;
+}
+
+.black {
+	margin: 2px auto;
+	background: #000;
+	color: #fff;
+}
+
+.red {
+	margin: 2px 20px 2px auto;
+	background: #7a000e;
+	color: #fff;
+}
+
+.guest {
+	border: 0;
+	width: 80%;
+	margin: 2px auto;
+	color: #525252;
+}
+
+.system {
+	border: 0;
+	width: 80%;
+	color: #ac000a
+}
+
+.system:before {
+	content: "system: ";
+	color: #6c6864;
+	font-size: 0.8em;
+}
+
+.nickname {
+	background: #fff;
+	color: #000;
+	font-style: italic;
+	border-radius: 3px;
+	font-size: 0.8em;
+	margin-right: 10px;
+	padding: 4px;
+}
+
+.nickname:after {
+	content: ": ";
+};

@@ -15,6 +15,11 @@ ChessForThree::Application.routes.draw do
 
   match '/game',    to: 'game#main',            via: 'get'
 
+  # post 'game/send_message'
+  match '/send_message', to: 'game#send_message', via: :post
+  
+
+
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'

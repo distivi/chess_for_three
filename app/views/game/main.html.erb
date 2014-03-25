@@ -1,6 +1,24 @@
 <% content_for :head do %>
-	<%= javascript_include_tag "main_game.js" %>
+	<%= javascript_include_tag 'main_game.js' %>
 <% end %>
 
-<h1>THIS IS CHEEEEEESSSS</h1>
-<h2>For 3 players</h2>
+<script>
+	var room_id = <%= @room.id%>;
+	var user_id = <%= current_user.id %>;
+</script>
+
+<h2>Hello, please wait while another players will connect</h2>
+
+
+<div class="row">
+	<div class="col-md-6 col-md-offset-3">
+		<h3>chat:</h3>
+		<div id="chat"></div>
+		<form class="form-horizontal" role="form">
+			<input type="text" class="form-control" id="input-text" placeholder="Enter message">
+			<button type="button" class="btn btn-default" id="send-button">Send</button>
+		</form>
+	</div>
+</div>
+
+<%= subscribe_to "/messages/#{@room.id}/new" %>
