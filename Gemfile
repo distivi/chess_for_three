@@ -39,7 +39,7 @@ group :doc do
 end
 
 group :production do
-  gem 'rails_12factor', '0.0.2'
+  gem 'rails_12factor'
 end
 
 
