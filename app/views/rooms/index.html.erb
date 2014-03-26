@@ -14,14 +14,18 @@
 	</tr>
 	<% counter = 1 %>
 	<% @rooms.each do |room| %>
-		<% if room.users_count < 3%>
-			<tr>
-				<td><%= counter %></td>
-				<td><%= room.name %></td>
-				<td><%= room.users_count %></td>
-				<td><%= button_to "Enter", room_path(room), :method => "get", :class => "btn btn-success" %></td>
-				<% counter += 1 %>
-			</tr>
-		<% end %>
+		<tr>
+			<td><%= counter %></td>
+			<td><%= room.name %></td>
+			<td><%= room.users_count %></td>
+			<td>
+				<% if room.users_count < 3%>
+					<%= button_to "Enter", room_path(room), :method => "get", :class => "btn btn-success" %>
+				<% else %>
+					<%= button_to "Look in", room_path(room), :method => "get", :class => "btn" %>
+				<% end %>
+			</td>
+			<% counter += 1 %>
+		</tr>
 	<%end%>
 </table>

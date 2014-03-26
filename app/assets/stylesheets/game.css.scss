@@ -30,7 +30,8 @@
 
 .red {
 	margin: 2px 20px 2px auto;
-	background: #7a000e;
+	background: red;
+	border: 0;
 	color: #fff;
 }
 
@@ -65,4 +66,42 @@
 
 .nickname:after {
 	content: ": ";
-};
+}
+
+
+#online-block {
+	width: 100%;
+	min-height: 40px;
+	border: 1px dashed #b8b1ab;
+	border-radius: 20px;
+	padding: 0 18px;
+}
+
+.online {
+	display: inline-block;
+	line-height: 38px;
+	padding: 0 19px;
+	margin: 1px 0;
+	border-radius: 19px;
+}
+
+#player-white {
+	background: #fff;
+	border: 1px solid black;
+}
+
+#player-black {
+	background: #000;
+	color: white;
+}
+
+#player-red {	
+	background: red;
+	color: white;
+}
+
+.player-guest {
+	background: #ccd3c6 ;
+}
+
+

@@ -1,20 +1,29 @@
 <script>
 	var room_id = <%= @room.id%>;
 	var user_id = <%= current_user.id %>;
+	var user_color = '<%= @color %>';
+	var user_name = '<%= current_user.name%>';
 </script>
 
-<h2>Hello, please wait while another players will connect</h2>
+<h2>Hello, please wait for other players</h2>
+
+<p>Who online:</p>
+<div id="online-block">
+<!--<div class="online" id="player-white">a</div>
+	<div class="online" id="player-black"></div>
+	<div class="online" id="player-red">asdasdfasdff</div> -->
+</div>
 
 
 <div class="row">
 	<div class="col-md-6 col-md-offset-3">
 		<h3>chat:</h3>
 		<div id="chat"></div>
-		<form class="form-horizontal" role="form">
-			<input type="text" class="form-control" id="input-text" placeholder="Enter message">
-			<button type="button" class="btn btn-default" id="send-button">Send</button>
-		</form>
+		<input type="text" class="form-control" id="input-text" placeholder="Enter message">
+		<button type="button" class="btn btn-default" id="send-button">Send</button>
 	</div>
 </div>
 
 <%= subscribe_to "/messages/#{@room.id}/new" %>
+<%= subscribe_to "/messages/#{@room.id}/user_connected" %>
+<%= subscribe_to "/messages/#{@room.id}/user_disconnected" %>

@@ -1,5 +1,14 @@
 <h1><%= @room.name %></h1>
 
+<% if current_user.room == @room %>
+	<%= button_to "Leave this room", {:controller => :rooms,
+		:action => 'leave'}, :method => "post", :class => "btn btn-warning" %>
+<% elsif current_user.room %>
+	<%= button_to "Go to my room", room_path(current_user.room), :method => "get", :class => "btn btn-primary" %>
+<% end %>
+
+<%= button_to "Go to chat room", {:controller => :game, :action => 'main', :id => @room}, :method => "post", :class => "btn btn-primary" %>
+
 <div class="centered-row">
 	<div class="col">
 		<%= image_tag("king_white.png", :alt => "white figure") %>

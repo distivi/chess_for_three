@@ -4,11 +4,11 @@ class RoomsController < ApplicationController
 			redirect_to root_path
 		else
 			room = current_user.room
-			if room
-				redirect_to :controller=>'game', :action => 'main', :id => room.id 
-			else 
+			# if room
+			# 	redirect_to :controller=>'game', :action => 'main', :id => room.id 
+			# else 
 				@rooms = Room.all
-			end
+			# end
 		end
 	end
 
@@ -30,16 +30,16 @@ class RoomsController < ApplicationController
 
 	def show
 		@room = Room.find(params[:id])
-		@player_white = User.find(@room.player_white_id) if @room.player_white_id
-		@player_black = User.find(@room.player_black_id) if @room.player_black_id
-		@player_red = User.find(@room.player_red_id) if @room.player_red_id
+		@player_white = User.find(@room.player_white_id) if (@room.player_white_id && @room.player_white_id.to_i != 0 )
+		@player_black = User.find(@room.player_black_id) if (@room.player_black_id && @room.player_black_id.to_i != 0 )
+		@player_red = User.find(@room.player_red_id) if (@room.player_red_id && @room.player_red_id.to_i != 0 )
 	end
 
 	def take_place
 		room = Room.find(params[:room])
 		user = User.find(params[:user])
-		
-		if user.room_id
+
+		if user.room
 			flash[:error] = "You are taking part in another room '#{user.room.name}'"
 		else
 			case params[:color]
@@ -78,6 +78,29 @@ class RoomsController < ApplicationController
 		else
 			redirect_to room
 		end
+	end
+
+
+	def leave
+		puts "<><>#{params}"
+		user = current_user
+		room = Room.find(params[:id])
+		if not room
+			flash[:error] = "Something went wrong."
+		elsif user.room
+			puts "user have room #{user.room.id} #{user.room.name}"
+			if room.player_white_id.to_i == user.id.to_i
+				room.update_attribute(:player_white_id, nil)
+			elsif room.player_black_id.to_i == user.id.to_i
+				room.update_attribute(:player_black_id, nil)
+			elsif room.player_red_id.to_i == user.id.to_i
+				room.update_attribute(:player_red_id, nil)
+			end
+
+			user.update_attribute(:room, nil)
+		end
+
+		redirect_to rooms_path
 	end
 
 	private

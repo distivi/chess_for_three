@@ -4,12 +4,14 @@ class GameController < ApplicationController
 
 		if not signed_in?
 			redirect_to root_path
-		elsif not current_user.room || current_user.room.id != id
-			redirect_to rooms_path
 		else
 			@room = Room.find(params[:id]) if id
 			if not @room
 				redirect_to rooms_path
+			else
+				@color = color_for_user(current_user.id,id)
+				channel = "/messages/#{@room.id}/user_connected"
+				PrivatePub.publish_to channel, :user => current_user.name, :color => @color
 			end
 		end
 	end
@@ -31,6 +33,21 @@ class GameController < ApplicationController
 
 			PrivatePub.publish_to channel, :chat_message => msg, :user => current_user.name, :color => color
 		end
+	end
+
+	def leave_chat
+		puts "leave_chat<<>> #{params}"
+		room_id = params[:room]
+		user_id = params[:user]
+		right_user = current_user.id.to_i == user_id.to_i
+		puts "right_user? #{right_user}"
+		if right_user
+			color = color_for_user(user_id,room_id)
+
+			channel = "/messages/#{room_id}/user_disconnected"
+			PrivatePub.publish_to channel, :color => color, :user => current_user.name
+		end
+		
 	end
 
 	private 

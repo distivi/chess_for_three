@@ -1,0 +1,20 @@
+<table class="table table-striped">
+	<tr>
+		<td>#</td>
+		<td>User Name</td>
+		<td>Playing in Room</td>
+	</tr>
+	<% counter = 1 %>
+	<% @users.each do |user| %>
+		<tr>
+			<td><%= counter %></td>
+			<td><%= user.name %></td>
+			<td>
+				<% if user.room %>
+					<%= button_to user.room.name, user.room, :method => "get", :class => "btn btn-success" %>
+				<% end %>
+			</td>
+			<% counter += 1 %>
+		</tr>
+	<%end%>
+</table>

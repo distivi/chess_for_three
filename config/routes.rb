@@ -12,12 +12,13 @@ ChessForThree::Application.routes.draw do
   match '/new_room',to: 'rooms#new',            via: 'get'
 
   match '/rooms/:id/take_place', to: 'rooms#take_place', :action => 'take_place', via: 'post'
+  match '/rooms/:id/leave',      to: 'rooms#leave',      :action => 'leave',      via: 'post'
 
-  match '/game',    to: 'game#main',            via: 'get'
+  match '/game',    to: 'game#main',            via: [:get, :post]
 
   # post 'game/send_message'
   match '/send_message', to: 'game#send_message', via: :post
-  
+  match '/leave_chat',   to: 'game#leave_chat',   via: :post
 
 
 
