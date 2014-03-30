@@ -15,6 +15,9 @@ gem 'coffee-rails', '~> 4.0.0'
 # Use twitter bootstrap
 gem 'bootstrap-sass', '2.3.2.0'
 
+# Use Three.js for 3D models
+gem 'threejs-rails', '~> 0.0.2'
+
 # # Use SCSS for stylesheets
 gem 'sass-rails', '4.0.2'
 

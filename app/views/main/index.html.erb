@@ -1,0 +1,35 @@
+<% if not current_user.desk %>
+	<%= button_to "Start playing with random users",
+			 {:controller => :main, :action => 'random_game'},
+			 :method => "get", 
+			 :class => "btn btn-primary" %>
+<% else %>
+	<%= button_to "Just do it (play)", desk_path(current_user.desk), :method => "get", :class => "btn btn-primary"  %>
+<% end %>
+
+<table class="table table-striped">
+	<tr>
+		<td>#</td>
+		<td>User Name</td>
+		<td>Status</td>
+	</tr>
+	<% counter = 1 %>
+	<% @users.each do |user| %>
+		<tr>
+			<td><%= counter %></td>
+			<td><%= user.name %></td>
+			<td>
+				<span>
+					<% if user.desk %>
+						Playing
+					<% elsif user.is_waiting%>
+						Waiting another players
+					<% else %>
+						Thinking about something ^_^
+					<% end %>
+				</span>
+			</td>
+			<% counter += 1 %>
+		</tr>
+	<%end%>
+</table>

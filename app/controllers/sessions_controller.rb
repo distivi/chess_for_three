@@ -2,7 +2,7 @@ class SessionsController < ApplicationController
 	def new
 		if signed_in?
 			puts "User sign in !"
-			redirect_to rooms_path
+			redirect_to main_path
 		end
 	end
 
@@ -10,7 +10,7 @@ class SessionsController < ApplicationController
 		user = User.find_by(email: params[:session][:email].downcase)
 		if user && user.authenticate(params[:session][:password])
 			sign_in user
-			redirect_to rooms_path
+			redirect_to main_path
 		else
 			flash.now[:error] = 'Invalid email/password combination'
 			render 'new'

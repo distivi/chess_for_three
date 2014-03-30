@@ -1,0 +1,7 @@
+<script>
+	var userColor = <%= current_user.color %>;
+	var deskID = <%= @desk.id %>
+</script>
+
+<canvas width="577" height="500" id="scene-container"></canvas>
+<%= javascript_include_tag "desk_manager" %>

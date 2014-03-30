@@ -2,7 +2,7 @@
 	<tr>
 		<td>#</td>
 		<td>User Name</td>
-		<td>Playing in Room</td>
+		<td>Status</td>
 	</tr>
 	<% counter = 1 %>
 	<% @users.each do |user| %>
@@ -10,9 +10,13 @@
 			<td><%= counter %></td>
 			<td><%= user.name %></td>
 			<td>
-				<% if user.room %>
-					<%= button_to user.room.name, user.room, :method => "get", :class => "btn btn-success" %>
-				<% end %>
+				<span>
+					<% if user.desk %>
+						Playing
+					<% else %>
+						Waiting
+					<% end %>
+				</span>
 			</td>
 			<% counter += 1 %>
 		</tr>

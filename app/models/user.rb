@@ -1,9 +1,10 @@
 class User < ActiveRecord::Base
-	belongs_to :room
-	validates_associated :room, :message => "You are waiting in anouther room"
+	belongs_to :desk
+	has_many :figures
 
 	before_save { self.email = email.downcase }
 	before_create :create_remember_token
+	after_initialize :default_values
 
 	validates :name, presence: true, length: { maximum: 50 }, uniqueness: true
 	VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-]+(\.[a-z]+)*\.[a-z]+\z/i
@@ -13,7 +14,6 @@ class User < ActiveRecord::Base
 
 	has_secure_password
 	validates :password, length: { minimum: 6 }
-
 
 	def User.new_remember_token
 		SecureRandom.urlsafe_base64
@@ -27,5 +27,13 @@ class User < ActiveRecord::Base
 
 		def create_remember_token
 			self.remember_token = User.encrypt(User.new_remember_token)
+		end
+
+		def default_values
+			self.is_waiting ||= false
+		end
+
+		def password_validation_required?
+			hashed_password.blank? || !@password.blank?
 		end
 end

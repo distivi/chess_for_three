@@ -1,3 +1,4 @@
+/*
 $(document).ready(function(){
 
 	if (user_name && user_color) {
@@ -75,4 +76,4 @@ $(document).ready(function(){
 	  			user: user_id});
 	});
 });
-
+*/

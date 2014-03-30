@@ -134,6 +134,7 @@ GEM
     thor (0.19.1)
     thread_safe (0.3.1)
       atomic (>= 1.1.7, < 2)
+    threejs-rails (0.0.2)
     tilt (1.4.1)
     treetop (1.4.15)
       polyglot
@@ -162,5 +163,6 @@ DEPENDENCIES
   sass-rails (= 4.0.2)
   sdoc
   thin
+  threejs-rails (~> 0.0.2)
   turbolinks
   uglifier (>= 1.3.0)

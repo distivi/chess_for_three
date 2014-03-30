@@ -1,24 +1,35 @@
 ChessForThree::Application.routes.draw do
   resources :users
   resources :sessions, only: [:new, :create, :destroy]
-  resources :rooms 
+  # resources :rooms 
+  resources :desk,  only: [:show, :new] do
+    member do
+      get 'help'
+      get 'move'
+    end
+  end
 
   root 'sessions#new'
 
   match '/signup',  to: 'users#new',            via: 'get'
   match '/signin',  to: 'sessions#new',         via: 'get'
   match '/signout', to: 'sessions#destroy',     via: 'delete'
-  match '/rooms',   to: 'rooms#index',          via: 'get'
-  match '/new_room',to: 'rooms#new',            via: 'get'
 
-  match '/rooms/:id/take_place', to: 'rooms#take_place', :action => 'take_place', via: 'post'
-  match '/rooms/:id/leave',      to: 'rooms#leave',      :action => 'leave',      via: 'post'
+  # match '/rooms',   to: 'rooms#index',          via: 'get'
+  # match '/new_room',to: 'rooms#new',            via: 'get'
+
+  # match '/rooms/:id/take_place', to: 'rooms#take_place', :action => 'take_place', via: 'post'
+  # match '/rooms/:id/leave',      to: 'rooms#leave',      :action => 'leave',      via: 'post'
 
   match '/game',    to: 'game#main',            via: [:get, :post]
 
   # post 'game/send_message'
   match '/send_message', to: 'game#send_message', via: :post
   match '/leave_chat',   to: 'game#leave_chat',   via: :post
+
+  match '/main',         to: 'main#index',        via: :get
+  match '/random_game',  to: 'main#random_game',  via: :get
+
 
 
 
