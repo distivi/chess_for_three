@@ -21,6 +21,8 @@ function rotateSquaresCoords(degree,centerPoint) {
 	};
 }
 
+
+
 $(document).ready(function() {
 
 	var canvas = $('#scene-container');
@@ -29,9 +31,23 @@ $(document).ready(function() {
 	centerPoint.x = canvas.width()/2;
 	centerPoint.y = canvas.height()/2;
 
-	
+	var allFiguresData;
 
-	imageObj.onload = function() {
+	getAllFiguresFromServer();
+
+	var selectedSquare = undefined;
+
+	if (userColor > 1) {
+		degree = (userColor == 2) ? 240 : 120;
+		rotateSquaresCoords(degree,centerPoint);
+	}
+
+	function drawAll() {
+		drawDesk();
+		drawAllFigures();
+	}
+
+	function drawDesk() {
 		context.clearRect(0,0,canvas.width,canvas.height);
 		context.save();
 		console.log(userColor);
@@ -41,27 +57,29 @@ $(document).ready(function() {
 			context.translate(canvas.width()/2,canvas.height()/2);
 			context.rotate(degree*Math.PI/180);
 			context.translate(-canvas.width()/2,-canvas.height()/2);
-			rotateSquaresCoords(degree,centerPoint);
 		};
 
 		context.drawImage(imageObj, 0, 0, imageObj.naturalWidth,imageObj.naturalHeight);
 		context.restore();
-
-		drawAllFigures();
-	};
+	}
 
 	function drawAllFigures() {
+		$.each(allFiguresData.users, function(index, user) {
+			var color = user.color;
+			$.each(user.figures, function(index, figure) {
+				var squareName = figure.square.name;
+				var figure_type = figure.figure_type;
+
+				drawChessFigure(squareName, figure_type, color);
+			});
+		});
+	}
+
+	function getAllFiguresFromServer() {
 		var url = deskID + ".json";
 		$.getJSON( url, function( data ) {
-			$.each(data.users, function(index, user) {
-				var color = user.color;
-				$.each(user.figures, function(index, figure) {
-					var squareName = figure.square.name;
-					var figure_type = figure.figure_type;
-
-					drawChessFigure(squareName, figure_type, color);
-				});
-			});
+			allFiguresData = data;
+			drawAll();
 		});
 	}
 
@@ -104,6 +122,98 @@ $(document).ready(function() {
 
 		context.drawImage(figuresSprite,xOffset,yOffset,30,30,centerPoint.x - 15,centerPoint.y - 15,30,30);
 	}
+
+	function drawSelectionAtSquare(square) {
+		var center = squares_coords[square];
+		context.beginPath();
+		context.arc(center.x, center.y, 15, 0, 2 * Math.PI, false);
+		context.fillStyle = "rgba(0, 255, 0, 0.6)";
+		context.fill();
+	}
+
+	function getSquareForPoint(point) {
+		var px = point.x;
+		var py = point.y;
+
+		for (var key in squares_coords) {
+			var squareCenter = squares_coords[key];
+			var rect = {origin: {x: squareCenter.x - 15, y: squareCenter.y - 15},
+						size: {width: 30, height: 30}};
+
+			if (isRectContainPoint(rect,point)) {
+				console.log(key);
+				return key;
+			}
+		}
+		console.log("miss");
+		return undefined;
+	}
+
+	function isRectContainPoint(rect,point) {
+		if (point.x >= rect.origin.x && 
+			point.y >= rect.origin.y &&
+			point.x <= (rect.origin.x + rect.size.width) &&
+			point.y <= rect.origin.y + rect.size.height ) {
+			return true;
+		}
+		return false;
+	}
+
+	canvas.click(function( e ) {
+		var x;
+		var y;
+		if (e.pageX || e.pageY) { 
+		  x = e.pageX;
+		  y = e.pageY;
+		} else { 
+		  x = e.clientX + document.body.scrollLeft + document.documentElement.scrollLeft; 
+		  y = e.clientY + document.body.scrollTop + document.documentElement.scrollTop; 
+		} 
+		x -= canvas[0].offsetLeft;
+		y -= canvas[0].offsetTop;
+
+		var point = {x: x, y: y};
+		var square = getSquareForPoint(point);
+
+		if (square) {
+			var url;
+			if (!selectedSquare) {
+				url = deskID + "/select_figure?square=" + square;
+			} else {
+				url = deskID + "/move_figure?from=" + selectedSquare + "&to=" + square;
+			};
+			
+			console.log(url);
+			$.getJSON( url, function( data ) {
+				if (!data.error) {
+					if (!selectedSquare) {
+						console.log("success");
+						console.log(data);
+						selectedSquare = square;
+						drawSelectionAtSquare(square);
+					} else {
+						selectedSquare = undefined;
+						allFiguresData = data;
+						drawAll();
+						console.log("we will move our figure");
+					};
+				} else {
+					selectedSquare = undefined;
+					drawAll();
+					console.log(data.error);
+				}
+			});
+		} else {
+			selectedSquare = undefined;
+			drawAll();
+		}
+	});
+
+// NOTIFICATIONS
+	var chat_channel = "/chess_desk/" + deskID + "/update";
+	PrivatePub.subscribe(chat_channel, function(data, channel) {
+		getAllFiguresFromServer();
+	});
 
 
 });

@@ -76,7 +76,153 @@ module DeskHelper
 								%w(H8 G7 F6 E5)]
 
 	def vertical_lines
-		
 		return CENTER_DIAGONALS_BLACK
 	end
+
+	def is_user_can_move_from_to(desk,from,to)
+		puts "is_user_can_move_from_to #{desk} #{from} #{to} #{current_user} #{current_user.desk.user_walketh_id}"
+		if current_user.id == current_user.desk.user_walketh_id
+			puts "check point 1 <"
+			from_name = from.upcase
+			to_name = to.upcase
+
+			from_square = desk.squares.where(:name => from_name).take
+			
+			if from_square and from_square.figure and from_square.figure.user == current_user
+				puts "check point 2 <"
+
+				to_square = desk.squares.where(:name => to_name).take
+
+				if to_square 
+					if to_square.figure and to_square.figure.user == current_user
+						puts "check point 2.1 <"
+						return false
+					end
+					puts "check point 3 <"
+					# check how figure moving
+					selected_figure = from_square.figure
+					current_color = current_user.color
+
+					is_can_move = false
+
+					if selected_figure.figure_type == 1 #king
+						# TODO:
+					elsif selected_figure.figure_type == 2 #queen
+						# TODO:
+					elsif selected_figure.figure_type == 3 #rook
+						# TODO:
+					elsif selected_figure.figure_type == 4 #bishop
+						# TODO:
+					elsif selected_figure.figure_type == 5 #knigh
+						# TODO:
+					elsif selected_figure.figure_type == 6 #pawn
+						moving_length = is_pawn_first_move(from_name,current_color) ? 2 : 1
+						pawn_on_line = vertical_line_for_square(from_name)
+						pawn_on_line = sort_vertical_line_for_pawn_with_color(pawn_on_line,from_name,current_color)
+
+						if pawn_on_line and pawn_on_line.include? to_name
+
+							from_index = pawn_on_line.index(from_name)
+							to_index = pawn_on_line.index(to_name)
+							length_bitween_square = to_index - from_index
+
+							if length_bitween_square > 0 and length_bitween_square <= moving_length
+
+								((from_index + 1)..to_index).to_a.each do |square_index|
+									square_tmp_name = pawn_on_line[square_index]
+									if desk.squares.where(:name => square_tmp_name).take.figure
+										return false
+									end
+									return true
+								end
+							end
+						else # pawn_on_line and pawn_on_line.include? to_name
+							# may be pawn can attack someone
+							attack_squares = attack_squares_for_pawn_at_square(from_name, pawn_on_line)
+							if attack_squares
+								attack_squares.each do |attack_square|
+									if attack_square == to_name and to_square.figure
+										return true
+									end
+								end
+							end
+						end
+					end
+
+				end
+			end
+		end
+
+		return false
+	end
+
+	def is_pawn_first_move(square_name, color)
+		start_line_for_pawn = (color == 1) ? "2" : (color == 2 ? "11" : "7") 
+		if square_name.sub(/\w/,'') == start_line_for_pawn
+			return true
+		end
+		return false
+	end
+
+	def vertical_line_for_square(square_name)
+		VERTICAL_LINES.each do |line|
+			if line.include? square_name
+				return line 
+			end
+		end
+	end
+
+	def horizontal_line_for_square(square_name)
+		HORIZONTAL_LINE.each do |line|
+			if line.include? square_name
+				return line 
+			end
+		end
+	end
+
+	def attack_squares_for_pawn_at_square(square_name, line)
+		pawn_index = line.index(square_name)
+		next_square = line[pawn_index + 1]
+		if next_square
+			horizontal_line = horizontal_line_for_square(next_square)
+			if horizontal_line
+				index = horizontal_line.index(next_square)
+				attack_squares = []
+				if horizontal_line[index + 1]
+					attack_squares << horizontal_line[index + 1]
+				end
+				if horizontal_line[index - 1]
+					attack_squares << horizontal_line[index - 1]
+				end
+				return (attack_squares.length == 0) ? nil : attack_squares
+			end
+		end
+		return nil
+	end
+
+	def sort_vertical_line_for_pawn_with_color(line,pawn_square,color)
+		line_index = VERTICAL_LINES.index line
+		square_index = line.index pawn_square
+
+		if color == 1 and line_index > 7 and line_index < 12
+			if square_index < 4
+				return line.reverse
+			end
+		elsif color == 2 
+			puts "check point ololo >>> #{line_index} #{square_index}"
+			unless line_index > 3 and line_index < 8 and square_index > 3
+				puts "check point ololo >>> #{line.reverse}"
+				return line.reverse
+			end
+		elsif color ==3 
+			if (line_index >=4 and line_index < 8) or
+				(line_index >= 0 and line_index < 4 and square_index < 4)
+				return line.reverse
+			end
+		end
+			
+
+		return line
+	end
+
 end

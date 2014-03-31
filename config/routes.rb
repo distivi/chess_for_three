@@ -4,8 +4,8 @@ ChessForThree::Application.routes.draw do
   # resources :rooms 
   resources :desk,  only: [:show, :new] do
     member do
-      get 'help'
-      get 'move'
+      get 'select_figure'
+      get 'move_figure'
     end
   end
 

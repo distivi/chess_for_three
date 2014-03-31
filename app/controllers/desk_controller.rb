@@ -16,6 +16,8 @@ class DeskController < ApplicationController
 				tmp_user.update_attribute(:desk, desk)
 			end
 
+			desk.update_attribute(:user_walketh_id, first_three_players.where(:color => 1))
+
 			create_squares_for_desk(desk)
 			arrange_figures_for_users_on_desk(first_three_players,desk)
 
@@ -33,29 +35,34 @@ class DeskController < ApplicationController
 		respond_to do |format|
 			format.html
 			format.json do 
-				render :json => @desk.to_json(:include => { 
-					:users => { 
-						:include => {:figures => {
-							:include => {
-									:square => {:only => :name}
-								}, :only => :figure_type}
-						}, :only => [:name, :color ]
-					}
-				})
-
-				# render json: @desk.users.map { |user| user.figures 
-				#render :json => @notes.to_json(:include => { :user => { :only => :username } })
+				render :json => json_for_all_figures_from_desk(@desk)
+				# render :json => @desk.to_json(:include => { 
+				# 	:users => { 
+				# 		:include => {:figures => {
+				# 			:include => {
+				# 					:square => {:only => :name}
+				# 				}, :only => :figure_type}
+				# 		}, :only => [:name, :color ]
+				# 	}
+				# })
 			end
 		end
 	end
 
-	def help
-		puts "#{params}"
+	def select_figure
 		if params[:square]
 			name = params[:square].upcase
 			square = Desk.find(params[:id]).squares.where(:name => name).take
 			if square.figure
-				render :json => square.figure
+				if square.figure.user == current_user
+					if current_user.id == current_user.desk.user_walketh_id
+						render :json => square.figure
+					else
+						render :json => {error: "Not your walketh"}
+					end
+				else
+					render :json => {error: "Not your figure"}
+				end
 			else
 				render :json => {error: "Empty square"}
 			end
@@ -64,17 +71,33 @@ class DeskController < ApplicationController
 		end
 	end
 
-	def move
+	def move_figure
 		puts "#{params}"
 		from = params[:from]
 		to = params[:to]
 		if from and to
 			desk = Desk.find(params[:id])
-			from_square = desk.squares.where(:name => from).take
-			if from_square.figure
-				render :json => {from: from, to: to}
+			if (is_user_can_move_from_to(desk,from,to))
+				to_square = desk.squares.where(:name => to.upcase).take
+				if to_square.figure 
+					to_square.figure.delete
+				end
+
+				from_figure = desk.squares.where(:name => from.upcase).take.figure
+
+				from_figure.square.update_attribute(:figure, nil)
+				to_square.update_attribute(:figure, from_figure)
+				from_figure.update_attribute(:square, to_square)
+
+				next_player_id = next_player_id_for_desk(desk)
+				desk.update_attribute(:user_walketh_id, next_player_id)
+
+				channel = "/chess_desk/#{desk.id}/update"
+				PrivatePub.publish_to channel, :desk => desk
+
+				render :json => json_for_all_figures_from_desk(desk)
 			else
-				render :json => {error: "Empty square"}
+				render :json => {error: "You can't go there"}
 			end
 		else
 			render :json => {error: "Wrong params"}
@@ -82,6 +105,27 @@ class DeskController < ApplicationController
 	end
 
 	private
+
+		def json_for_all_figures_from_desk(desk)
+			return desk.to_json(:include => { 
+						:users => { 
+							:include => {:figures => {
+								:include => {
+										:square => {:only => :name}
+									}, :only => :figure_type}
+							}, :only => [:name, :color ]
+						}
+					})
+		end
+
+		def next_player_id_for_desk(desk)
+			current_user_color_id = desk.user_walketh_id
+			users = desk.users
+			color = users.find(current_user_color_id).color
+			color = (color == 3) ? 1 : color + 1
+			next_user = users.where(:color => color).take
+			return next_user.id
+		end
 
 		def create_squares_for_desk(desk)
 			# warning!!! Very hardcoded ranges, don't touch anithing here

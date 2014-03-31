@@ -5,3 +5,5 @@
 
 <canvas width="577" height="500" id="scene-container"></canvas>
 <%= javascript_include_tag "desk_manager" %>
+
+<%= subscribe_to "/chess_desk/#{@desk.id}/update" %>
