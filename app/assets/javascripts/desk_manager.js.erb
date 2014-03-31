@@ -1,9 +1,7 @@
 // global objects
 var imageObj = new Image();
-imageObj.src = "<%= asset_path 'desk.png' %>";
-
 var figuresSprite = new Image();
-figuresSprite.src = "<%= asset_path 'chess_set.png' %>";
+
 
 function rotateSquaresCoords(degree,centerPoint) {
 	for (var square in squares_coords) {
@@ -30,6 +28,16 @@ $(document).ready(function() {
 	var centerPoint = {x: 0, y: 0};
 	centerPoint.x = canvas.width()/2;
 	centerPoint.y = canvas.height()/2;
+
+
+	imageObj.onload = function() {
+		figuresSprite.onload = function() {
+			drawAllFigures();
+		};
+		figuresSprite.src = "<%= asset_path 'chess_set.png' %>";
+		drawDesk();
+	};
+	imageObj.src = "<%= asset_path 'desk.png' %>";
 
 	var allFiguresData;
 
