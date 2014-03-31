@@ -1,2 +1,18 @@
 <h1>Please wait for another players...</h1> 
 <h2>Players in queue: <%= @count %></h2>
+
+<script>
+	// NOTIFICATIONS
+	$(function() { 
+		console.log("check point update 1 ");
+		var player_queue_channel = "/player_queue_update"
+		PrivatePub.subscribe(player_queue_channel, function(data, channel) {
+			console.log("check point update 2 ");
+			console.log(data);
+			location.reload();
+		});
+	});
+
+</script>
+
+<%= subscribe_to "/player_queue_update" %>

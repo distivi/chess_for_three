@@ -16,7 +16,7 @@ class DeskController < ApplicationController
 				tmp_user.update_attribute(:desk, desk)
 			end
 
-			desk.update_attribute(:user_walketh_id, first_three_players.where(:color => 1))
+			desk.update_attribute(:user_walketh_id, first_three_players[0].id)
 
 			create_squares_for_desk(desk)
 			arrange_figures_for_users_on_desk(first_three_players,desk)
@@ -36,15 +36,6 @@ class DeskController < ApplicationController
 			format.html
 			format.json do 
 				render :json => json_for_all_figures_from_desk(@desk)
-				# render :json => @desk.to_json(:include => { 
-				# 	:users => { 
-				# 		:include => {:figures => {
-				# 			:include => {
-				# 					:square => {:only => :name}
-				# 				}, :only => :figure_type}
-				# 		}, :only => [:name, :color ]
-				# 	}
-				# })
 			end
 		end
 	end
