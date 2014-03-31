@@ -29,7 +29,9 @@ $(document).ready(function() {
 	centerPoint.x = canvas.width()/2;
 	centerPoint.y = canvas.height()/2;
 
-
+	var errorContainer = $("#error-container");
+	errorContainer.hide();
+	
 	imageObj.onload = function() {
 		figuresSprite.onload = function() {
 			drawAllFigures();
@@ -195,17 +197,17 @@ $(document).ready(function() {
 			$.getJSON( url, function( data ) {
 				if (!data.error) {
 					if (!selectedSquare) {
-						console.log("success");
-						console.log(data);
+						errorContainer.hide();
 						selectedSquare = square;
 						drawSelectionAtSquare(square);
 					} else {
 						selectedSquare = undefined;
 						allFiguresData = data;
 						drawAll();
-						console.log("we will move our figure");
 					};
 				} else {
+					errorContainer.html(data.error);
+					errorContainer.show();
 					selectedSquare = undefined;
 					drawAll();
 					console.log(data.error);
@@ -220,6 +222,7 @@ $(document).ready(function() {
 // NOTIFICATIONS
 	var chat_channel = "/chess_desk/" + deskID + "/update";
 	PrivatePub.subscribe(chat_channel, function(data, channel) {
+		errorContainer.hide();
 		getAllFiguresFromServer();
 	});
 

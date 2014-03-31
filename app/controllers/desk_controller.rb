@@ -42,20 +42,20 @@ class DeskController < ApplicationController
 
 	def select_figure
 		if params[:square]
-			name = params[:square].upcase
-			square = Desk.find(params[:id]).squares.where(:name => name).take
-			if square.figure
-				if square.figure.user == current_user
-					if current_user.id == current_user.desk.user_walketh_id
+			if current_user.id == current_user.desk.user_walketh_id
+				name = params[:square].upcase
+				square = Desk.find(params[:id]).squares.where(:name => name).take
+				if square.figure
+					if square.figure.user == current_user
 						render :json => square.figure
 					else
-						render :json => {error: "Not your walketh"}
+						render :json => {error: "Not your figure"}
 					end
 				else
-					render :json => {error: "Not your figure"}
+					render :json => {error: "Empty square"}
 				end
 			else
-				render :json => {error: "Empty square"}
+				render :json => {error: "Now is not your turn, please wait."}
 			end
 		else 
 			render :json => {error: "Wrong params"}

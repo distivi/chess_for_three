@@ -3,6 +3,8 @@
 	var deskID = <%= @desk.id %>
 </script>
 
+<div id="error-container" class="alert alert-error" ></div>
+
 <canvas width="577" height="500" id="scene-container"></canvas>
 <%= javascript_include_tag "desk_manager" %>
 
