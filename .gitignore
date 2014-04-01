@@ -25,7 +25,7 @@ pickle-email-*.html
 config/initializers/secret_token.rb
 
 #ignore other files
-database.yml
+# database.yml
 doc/
 *.swp
 *~
