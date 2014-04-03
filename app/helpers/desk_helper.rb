@@ -75,9 +75,6 @@ module DeskHelper
 								%w(N12 M11 L10 K9),
 								%w(H8 G7 F6 E5)]
 
-	def vertical_lines
-		return CENTER_DIAGONALS_BLACK
-	end
 
 	def is_user_can_move_from_to(desk,from,to)
 		puts "is_user_can_move_from_to #{desk} #{from} #{to} #{current_user} #{current_user.desk.user_walketh_id}"
@@ -106,15 +103,77 @@ module DeskHelper
 					is_can_move = false
 
 					if selected_figure.figure_type == 1 #king
-						# TODO:
+						moving_line = moving_line_for_rook_at_square_to_square(from_name,to_name)
+						if moving_line
+							is_can_move = is_king_can_move_on_path(from_name,to_name,moving_line,desk)
+							if not is_can_move
+								# may be King can make_castling
+								is_casting = is_king_can_make_castling(from_name,to_name,moving_line,desk)
+								puts "check point qweqwe #{is_casting}"
+								if is_casting
+									# move rook
+									# {move_rook: {from: path[rook_index], to: path[new_rook_square_index]}}
+									rook_from_square = is_casting[:move_rook][:from]
+									rook_to_square = is_casting[:move_rook][:to]
+									move_figure_from_square_to_square(rook_from_square,rook_to_square,desk)
+
+									return true
+								end
+							end
+							return is_can_move
+						end
+
+						moving_diagonal = moving_diagonal_for_bishop_at_square_to_square(from_name,to_name)
+						if moving_diagonal
+							is_can_move = is_king_can_move_on_path(from_name,to_name,moving_diagonal,desk)
+							return is_can_move
+						end
+
+						return false
+						# king END:
 					elsif selected_figure.figure_type == 2 #queen
-						# TODO:
+						moving_line = moving_line_for_rook_at_square_to_square(from_name,to_name)
+						if moving_line
+							is_can_move = is_nobody_overlap_way_from_to_on_path(from_name,to_name,moving_line,desk)
+							return is_can_move
+						end
+
+						moving_diagonal = moving_diagonal_for_bishop_at_square_to_square(from_name,to_name)
+						if moving_diagonal
+							is_can_move = is_nobody_overlap_way_from_to_on_path(from_name,to_name,moving_diagonal,desk)
+							return is_can_move
+						end
+
+						return false
+						# queen END:
 					elsif selected_figure.figure_type == 3 #rook
-						# TODO:
+						moving_line = moving_line_for_rook_at_square_to_square(from_name,to_name)
+						if moving_line
+							is_can_move = is_nobody_overlap_way_from_to_on_path(from_name,to_name,moving_line,desk)
+							return is_can_move
+						end
+
+						return false
+						# rook END
 					elsif selected_figure.figure_type == 4 #bishop
-						# TODO:
-					elsif selected_figure.figure_type == 5 #knigh
-						# TODO:
+						moving_diagonal = moving_diagonal_for_bishop_at_square_to_square(from_name,to_name)
+						if moving_diagonal
+							is_can_move = is_nobody_overlap_way_from_to_on_path(from_name,to_name,moving_diagonal,desk)
+							return is_can_move
+						end
+
+						return false
+						#bishop END
+					elsif selected_figure.figure_type == 5 #knight
+						available_squares = available_squares_for_knight_at_square(from_name)
+						available_squares.each do |tmp_square|
+							if tmp_square == to_name
+								return true
+							end
+						end
+
+						return false
+						# knight END:
 					elsif selected_figure.figure_type == 6 #pawn
 						moving_length = is_pawn_first_move(from_name,current_color) ? 2 : 1
 						pawn_on_line = vertical_line_for_square(from_name)
@@ -138,7 +197,7 @@ module DeskHelper
 							end
 						else # pawn_on_line and pawn_on_line.include? to_name
 							# may be pawn can attack someone
-							attack_squares = attack_squares_for_pawn_at_square(from_name, pawn_on_line)
+							attack_squares = attack_squares_for_pawn_at_square(from_name, pawn_on_line, current_color)
 							if attack_squares
 								attack_squares.each do |attack_square|
 									if attack_square == to_name and to_square.figure
@@ -153,6 +212,39 @@ module DeskHelper
 			end
 		end
 
+		return false
+	end
+
+	def move_figure_from_square_to_square(from_square,to_square,desk)
+		to_square = desk.squares.where(:name => to_square.upcase).take
+		if to_square.figure 
+			to_square.figure.delete
+		end
+
+		from_figure = desk.squares.where(:name => from_square.upcase).take.figure
+
+		from_figure.square.update_attribute(:figure, nil)
+		to_square.update_attribute(:figure, from_figure)
+		from_figure.update_attribute(:square, to_square)
+
+		if from_figure.figure_type == 6 # pawn
+			if is_pawn_come_to_last_line(to,current_user.color)
+				from_figure.update_attribute(:figure_type, 2)
+			end
+		end
+	end
+
+	def is_pawn_come_to_last_line(square_name, pawn_color)
+		square = square_name.upcase
+		horizontal_line = horizontal_line_for_square(square)
+		line_index = HORIZONTAL_LINE.index(horizontal_line)
+		if pawn_color == 1 and (line_index == 4 or line_index == 8)
+			return true
+		elsif pawn_color == 2 and (line_index == 0 or line_index == 4)
+			return true
+		elsif pawn_color == 3 and (line_index == 0 or line_index == 8)
+			return true
+		end
 		return false
 	end
 
@@ -180,12 +272,48 @@ module DeskHelper
 		end
 	end
 
-	def attack_squares_for_pawn_at_square(square_name, line)
+	def diagonals_for_square(square_name)
+		diagonals = []
+		DIAGONALS.each do |diagonal|
+			if diagonal.include? square_name
+				diagonals << diagonal
+			end
+		end
+		return (diagonals.length > 0) ? diagonals : nil
+	end
+
+	def center_diagonals_for_square(square_name)
+		white_diagonal = center_diagonal_white_for_square(square_name)
+		black_diagobal = center_diagonal_black_for_square(square_name)
+		return {white: white_diagonal, black: black_diagobal}
+	end
+
+	def center_diagonal_white_for_square(square_name)
+		CENTER_DIAGONALS_WHITE.each do |diagonal|
+			if diagonal.include? square_name
+				return diagonal
+			end
+		end
+		return nil
+	end
+
+	def center_diagonal_black_for_square(square_name)
+		CENTER_DIAGONALS_BLACK.each do |diagonal|
+			if diagonal.include? square_name
+				return diagonal
+			end
+		end
+		return nil
+	end
+
+	def attack_squares_for_pawn_at_square(square_name, line, pawn_color)
 		pawn_index = line.index(square_name)
 		next_square = line[pawn_index + 1]
+
 		if next_square
 			horizontal_line = horizontal_line_for_square(next_square)
 			if horizontal_line
+				# check for squares with standart 2 players logic
 				index = horizontal_line.index(next_square)
 				attack_squares = []
 				if horizontal_line[index + 1]
@@ -194,6 +322,14 @@ module DeskHelper
 				if horizontal_line[index - 1]
 					attack_squares << horizontal_line[index - 1]
 				end
+
+				# check for squares with 3 players logic on center diagonals
+				center_attack_squares = attack_squares_for_pawn_at_square_with_color(square_name, pawn_color)
+				if center_attack_squares
+					attack_squares += center_attack_squares
+					attack_squares.uniq!
+				end
+				
 				return (attack_squares.length == 0) ? nil : attack_squares
 			end
 		end
@@ -220,9 +356,193 @@ module DeskHelper
 				return line.reverse
 			end
 		end
-			
-
 		return line
+	end
+
+	def attack_squares_for_pawn_at_square_with_color(square_name, pawn_color)
+		diagonals = center_diagonals_for_square(square_name)
+		diagonal = diagonals[:white] || diagonals[:black]
+
+		if diagonal
+			# which center diagonal
+			center_diagonal = diagonals[:white] ? CENTER_DIAGONALS_WHITE : CENTER_DIAGONALS_BLACK
+			square_index = diagonal.index(square_name)
+
+			if square_index == 3
+				diagonalIndex = center_diagonal.index(diagonal)
+
+				if pawn_color == 1 and diagonalIndex == 0
+					return [center_diagonal[1][3],center_diagonal[2][3]]
+				elsif pawn_color == 2 and diagonalIndex == 1
+					return [center_diagonal[0][3],center_diagonal[3][3]]
+				elsif pawn_color == 3 and diagonalIndex == 2
+					return [center_diagonal[0][3],center_diagonal[1][3]]
+				end
+			end
+		end
+		return nil;
+	end
+
+	def moving_diagonal_for_bishop_at_square_to_square(from_square,to_square)
+		diagonals = diagonals_for_square(from_square)
+		if diagonals
+			#check if to_square on it diagonal
+			diagonals.each do |diagonal|
+				if diagonal.include? to_square
+					return diagonal
+				end
+			end
+		end
+
+		# check if can move on center diagonal
+		center_diagonals = center_diagonals_for_square(from_square)
+		center_diagonal = center_diagonals[:white] ? CENTER_DIAGONALS_WHITE : CENTER_DIAGONALS_BLACK
+
+		from_diagonal = center_diagonals[:white] || center_diagonals[:black]
+
+		#check if to_square on it diagonal
+		center_diagonal.each do |tmp_diagonal|
+			if tmp_diagonal.include? to_square
+				from_diagonal_index = center_diagonal.index(from_diagonal)
+				to_diagonal_index = center_diagonal.index(tmp_diagonal)
+				if from_diagonal_index == to_diagonal_index
+					return from_diagonal
+				else
+					long_diagonal = from_diagonal + tmp_diagonal.reverse
+					return long_diagonal
+				end
+			end
+		end
+
+		return nil
+	end
+
+	def moving_line_for_rook_at_square_to_square(from_square,to_square)
+		h_line = horizontal_line_for_square(from_square)
+		if h_line.include? to_square
+			return h_line
+		end
+
+		v_line = vertical_line_for_square(from_square)
+		if v_line.include? to_square
+			return v_line
+		end
+
+		return nil
+	end
+
+	def available_squares_for_knight_at_square(from_square)
+		available_squares = []
+
+		v_line = vertical_line_for_square(from_square)
+		square_index = v_line.index(from_square)
+
+		if square_index < 6 
+			step_one_square = v_line[square_index + 2]
+			available_squares += get_horizontal_squares_for_knight_step_one_square(step_one_square)
+		end
+
+		if square_index > 1
+			step_one_square = v_line[square_index - 2]
+			available_squares += get_horizontal_squares_for_knight_step_one_square(step_one_square)
+		end
+
+		h_line = horizontal_line_for_square(from_square)
+		square_index = h_line.index(from_square)
+
+		if square_index < 6
+			step_one_square = h_line[square_index + 2]
+			available_squares += get_vertical_squares_for_knight_step_one_square(step_one_square)
+		end
+
+		if square_index > 1
+			step_one_square = h_line[square_index - 2]
+			available_squares += get_vertical_squares_for_knight_step_one_square(step_one_square)
+		end
+
+		return ( available_squares.length > 0 ) ? available_squares : nil
+	end
+
+	def get_horizontal_squares_for_knight_step_one_square(for_square)
+		available_squares = []
+		h_line = horizontal_line_for_square(for_square)
+		h_square_index = h_line.index(for_square)
+		available_squares << h_line[h_square_index + 1] if h_line[h_square_index + 1]
+		available_squares << h_line[h_square_index - 1] if h_line[h_square_index - 1]
+		return available_squares
+	end
+
+	def get_vertical_squares_for_knight_step_one_square(for_square)
+		available_squares = []
+		v_line = vertical_line_for_square(for_square)
+		v_square_index = v_line.index(for_square)
+		available_squares << v_line[v_square_index + 1] if v_line[v_square_index + 1]
+		available_squares << v_line[v_square_index - 1] if v_line[v_square_index - 1]
+		return available_squares
+	end
+
+	def is_nobody_overlap_way_from_to_on_path(from_square,to_square,path,desk)
+		from_index = path.index(from_square)
+		to_index = path.index(to_square)
+		if from_index and to_index
+			min_index = [from_index, to_index].min + 1
+			max_index = [from_index, to_index].max - 1
+			(min_index..max_index).to_a.each do |index|
+				tmp_square_name = path[index]
+				if desk.squares.where(:name => tmp_square_name).take.figure
+					return false
+				end
+			end
+			return true
+		end
+		return false
+	end
+
+	def is_king_can_move_on_path(from_square,to_square,path,desk)
+		from_index = path.index(from_square)
+		to_index = path.index(to_square)
+		length = (from_index - to_index).abs
+
+		if length == 1
+			return true
+		end
+
+		return false
+	end
+
+	def is_king_can_make_castling(from_square,to_square,path,desk)
+		puts "is_king_can_make_castling !!!"
+		king = current_user.figures.where(:figure_type => 1).take
+		if king.untouched
+			puts "is_king_can_make_castling king.untouched"
+			is_horizontal_path = HORIZONTAL_LINE.include?(path)
+			puts "is_king_can_make_castling is_horizontal_path #{is_horizontal_path}"
+			if is_horizontal_path and path.include? to_square
+				from_index = path.index(from_square)
+				to_index = path.index(to_square)
+				length = (from_index - to_index).abs
+				puts "is_king_can_make_castling length #{length}"
+				if length == 2
+					rooks = current_user.figures.where(:figure_type => 3, :untouched => true)
+					if rooks.count > 0
+						rook_index = (from_index > to_index) ? 0 : 7
+
+						rooks.each do |rook|
+							puts "rook.square.name == path[rook_index] #{rook.square.name} | #{path[rook_index]}"
+							if rook.square.name == path[rook_index]
+								is_can_move = is_nobody_overlap_way_from_to_on_path(from_square,path[rook_index],path,desk)
+								if is_can_move
+									new_rook_square_index = (rook_index == 0) ? 3 : 5;
+									return {move_rook: {from: path[rook_index], to: path[new_rook_square_index]}}
+								end
+							end
+						end
+
+					end
+				end
+			end
+		end
+		return nil
 	end
 
 end

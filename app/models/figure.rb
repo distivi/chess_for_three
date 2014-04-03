@@ -6,11 +6,27 @@ class Figure < ActiveRecord::Base
 	validates :figure_type, :inclusion => { :in => 1..6, :message => "Figure type should be in range 1..6" }
 
 	after_initialize :set_name_for_type
+	after_save :after_save_update_name
+
+	def square=(value)
+		if self.square
+			self.update_column(:untouched, false)
+		end
+
+		self.update_column(:square_id, value)
+	end
 
 	private
 		def set_name_for_type
 			names = %w(King Queen Rook Bishop Knight Pawn)
-			self.name = names[self.figure_type - 1]
+			new_name = names[self.figure_type - 1]
+			self.name = new_name
+		end
+
+		def after_save_update_name
+			names = %w(King Queen Rook Bishop Knight Pawn)
+			new_name = names[self.figure_type - 1]
+			self.update_column(:name, new_name)
 		end
 
 	#	figure_type	|	name

@@ -80,6 +80,12 @@ class DeskController < ApplicationController
 				to_square.update_attribute(:figure, from_figure)
 				from_figure.update_attribute(:square, to_square)
 
+				if from_figure.figure_type == 6 # pawn
+					if is_pawn_come_to_last_line(to,current_user.color)
+						from_figure.update_attribute(:figure_type, 2)
+					end
+				end
+
 				next_player_id = next_player_id_for_desk(desk)
 				desk.update_attribute(:user_walketh_id, next_player_id)
 
