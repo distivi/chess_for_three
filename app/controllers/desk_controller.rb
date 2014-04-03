@@ -23,6 +23,12 @@ class DeskController < ApplicationController
 
 			if desk.save
 				redirect_to desk
+
+				# notify users for new game
+				first_three_players.each do |user|
+					channel = "/start_game/#{user.id}"
+					PrivatePub.publish_to channel, :is_start => true
+				end
 			else
 				redirect_to main_path
 			end
@@ -69,30 +75,18 @@ class DeskController < ApplicationController
 		if from and to
 			desk = Desk.find(params[:id])
 			if (is_user_can_move_from_to(desk,from,to))
-				to_square = desk.squares.where(:name => to.upcase).take
-				if to_square.figure 
-					to_square.figure.delete
+				is_moved = move_figure_from_square_to_square(from,to,desk)
+				if is_moved
+					next_player_id = next_player_id_for_desk(desk)
+					desk.update_attribute(:user_walketh_id, next_player_id)
+
+					channel = "/chess_desk/#{desk.id}/update"
+					PrivatePub.publish_to channel, :desk => desk
+
+					render :json => json_for_all_figures_from_desk(desk)
+				else
+					render :json => {error: "You can't go there"}
 				end
-
-				from_figure = desk.squares.where(:name => from.upcase).take.figure
-
-				from_figure.square.update_attribute(:figure, nil)
-				to_square.update_attribute(:figure, from_figure)
-				from_figure.update_attribute(:square, to_square)
-
-				if from_figure.figure_type == 6 # pawn
-					if is_pawn_come_to_last_line(to,current_user.color)
-						from_figure.update_attribute(:figure_type, 2)
-					end
-				end
-
-				next_player_id = next_player_id_for_desk(desk)
-				desk.update_attribute(:user_walketh_id, next_player_id)
-
-				channel = "/chess_desk/#{desk.id}/update"
-				PrivatePub.publish_to channel, :desk => desk
-
-				render :json => json_for_all_figures_from_desk(desk)
 			else
 				render :json => {error: "You can't go there"}
 			end

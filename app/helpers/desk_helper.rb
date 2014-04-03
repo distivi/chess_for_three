@@ -215,23 +215,29 @@ module DeskHelper
 		return false
 	end
 
-	def move_figure_from_square_to_square(from_square,to_square,desk)
-		to_square = desk.squares.where(:name => to_square.upcase).take
+	def move_figure_from_square_to_square(from_name,to_name,desk)
+		to_square = desk.squares.where(:name => to_name.upcase).take
 		if to_square.figure 
-			to_square.figure.delete
+			if to_square.figure.figure_type != 1
+				to_square.figure.delete
+			else
+				return false
+			end
 		end
 
-		from_figure = desk.squares.where(:name => from_square.upcase).take.figure
+		from_figure = desk.squares.where(:name => from_name.upcase).take.figure
 
 		from_figure.square.update_attribute(:figure, nil)
 		to_square.update_attribute(:figure, from_figure)
 		from_figure.update_attribute(:square, to_square)
 
 		if from_figure.figure_type == 6 # pawn
-			if is_pawn_come_to_last_line(to,current_user.color)
+			if is_pawn_come_to_last_line(to_name,current_user.color)
 				from_figure.update_attribute(:figure_type, 2)
 			end
 		end
+
+		return true
 	end
 
 	def is_pawn_come_to_last_line(square_name, pawn_color)
@@ -370,11 +376,11 @@ module DeskHelper
 
 			if square_index == 3
 				diagonalIndex = center_diagonal.index(diagonal)
-
+				puts "aaaa center_diagonal #{center_diagonal} #{diagonalIndex} #{pawn_color}" 
 				if pawn_color == 1 and diagonalIndex == 0
 					return [center_diagonal[1][3],center_diagonal[2][3]]
 				elsif pawn_color == 2 and diagonalIndex == 1
-					return [center_diagonal[0][3],center_diagonal[3][3]]
+					return [center_diagonal[0][3],center_diagonal[2][3]]
 				elsif pawn_color == 3 and diagonalIndex == 2
 					return [center_diagonal[0][3],center_diagonal[1][3]]
 				end

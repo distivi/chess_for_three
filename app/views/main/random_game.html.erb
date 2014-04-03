@@ -3,11 +3,17 @@
 
 <script>
 	// NOTIFICATIONS
+	var user_id = <%= current_user.id%>
 	$(function() { 
-		console.log("check point update 1 ");
+
 		var player_queue_channel = "/player_queue_update"
 		PrivatePub.subscribe(player_queue_channel, function(data, channel) {
-			console.log("check point update 2 ");
+			console.log(data);
+			location.reload();
+		});
+
+		var start_game = "/start_game/" + user_id
+		PrivatePub.subscribe(start_game, function(data, channel) {
 			console.log(data);
 			location.reload();
 		});
@@ -16,3 +22,4 @@
 </script>
 
 <%= subscribe_to "/player_queue_update" %>
+<%= subscribe_to "/start_game/#{current_user.id}" %>
