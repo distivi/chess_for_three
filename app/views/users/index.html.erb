@@ -2,6 +2,7 @@
 	<tr>
 		<td>#</td>
 		<td>User Name</td>
+		<td>Email</td>
 		<td>Status</td>
 	</tr>
 	<% counter = 1 %>
@@ -9,12 +10,15 @@
 		<tr>
 			<td><%= counter %></td>
 			<td><%= user.name %></td>
+			<td><%= user.email %></td>
 			<td>
 				<span>
 					<% if user.desk %>
 						Playing
+					<% elsif user.is_waiting%>
+						Waiting another players
 					<% else %>
-						Waiting
+						Thinking about something ^_^
 					<% end %>
 				</span>
 			</td>
