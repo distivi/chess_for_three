@@ -46,6 +46,33 @@ class DeskController < ApplicationController
 		end
 	end
 
+	def destroy
+		desk = Desk.find(params[:id])
+		if current_user.desk == desk
+			# remove all figures 
+			desk.squares.each do |square|
+				if square.figure
+					square.figure.destroy
+				end
+				square.destroy
+			end
+
+			desk.users.each do |user|
+				user.update_attribute(:color, nil)
+				user.update_attribute(:desk, nil)
+				user.update_attribute(:is_waiting, false)
+			end
+
+			
+			channel = "/chess_desk/#{desk.id}/finished"
+			PrivatePub.publish_to channel, :is_finished => true
+
+			desk.destroy
+
+		end
+		redirect_to root_url
+	end
+
 	def select_figure
 		if params[:square]
 			if current_user.id == current_user.desk.user_walketh_id

@@ -226,6 +226,11 @@ $(document).ready(function() {
 		getAllFiguresFromServer();
 	});
 
+	var exit_channel = "/chess_desk/" + deskID + "/finished"
+	PrivatePub.subscribe(exit_channel, function(data, channel) {
+		alert("Game finished one user exit from room");
+		document.location = "/";
+	});
 
 });
 

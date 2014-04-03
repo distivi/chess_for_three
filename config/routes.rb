@@ -2,7 +2,7 @@ ChessForThree::Application.routes.draw do
   resources :users
   resources :sessions, only: [:new, :create, :destroy]
   # resources :rooms 
-  resources :desk,  only: [:show, :new] do
+  resources :desk,  only: [:show, :new, :destroy] do
     member do
       get 'select_figure'
       get 'move_figure'

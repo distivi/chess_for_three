@@ -2,10 +2,11 @@
 	var userColor = <%= current_user.color %>;
 	var deskID = <%= @desk.id %>
 </script>
-
+<%= link_to "Exit from room", desk_path(@desk.id), method: "delete" %>
 <div id="error-container" class="alert alert-error" ></div>
 
 <canvas width="577" height="500" id="scene-container"></canvas>
 <%= javascript_include_tag "desk_manager" %>
 
 <%= subscribe_to "/chess_desk/#{@desk.id}/update" %>
+<%= subscribe_to "/chess_desk/#{@desk.id}/finished" %>
