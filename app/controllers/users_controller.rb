@@ -1,6 +1,12 @@
 class UsersController < ApplicationController
 	def index
 		@users = User.all
+		respond_to do |format|
+			format.html
+			format.json do 
+				render :json => @users.to_json(:only => [:id, :name, :email ])
+			end
+		end
 	end
 	
 	def new
@@ -9,10 +15,15 @@ class UsersController < ApplicationController
 
 	def show
 		@user = User.find(params[:id])
+		respond_to do |format|
+			format.html
+			format.json do 
+				render :json => @user.to_json(:only => [:id, :name, :email ])
+			end
+		end
 	end
 
 	def create
-		puts "Fucking sheet<<<< #{params}"
 		@user = User.new(user_params)
 		if @user.save
 			sign_in @user
